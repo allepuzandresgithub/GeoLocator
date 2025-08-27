@@ -10,5 +10,23 @@ Este proyecto es una aplicación web que utiliza **Leaflet** para mostrar ubicac
 - **Mostrar mi IP**: localiza tu dirección IP pública y la marca con un marcador azul y un círculo de 5 km.
 - **Botón de guardar mapa** (captura de imagen del mapa usando `leaflet-image`).
 
-## 📂 Estructura del proyecto
+## 🏁 Inicio rápido
+
+Sigue estos pasos para poner en marcha el proyecto en tu entorno local:
+
+1. **Instala Rust**  
+   Si aún no lo tienes, instala Rust y Cargo desde [https://rustup.rs/](https://rustup.rs/).
+
+2. **Clona este repositorio**  
+   ```bash
+   git clone https://github.com/allepuzandresgithub/GeoLocator
+   cd GeoLocator
+   cargo build       # compila en modo debug
+   cargo build --release   # compila optimizado para producción
+   cargo run         # compila (si es necesario) y ejecuta en modo debug
+   cargo run --release   # compila optimizado y ejecuta
+   
+
+
+   
 
