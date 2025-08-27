@@ -25,8 +25,3 @@ Sigue estos pasos para poner en marcha el proyecto en tu entorno local:
    cargo build --release   # compila optimizado para producción
    cargo run         # compila (si es necesario) y ejecuta en modo debug
    cargo run --release   # compila optimizado y ejecuta
-   
-
-
-   
-
