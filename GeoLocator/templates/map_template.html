@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mapa Satelital / Oscuro por IP</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  html,body,#map { height: 100%; margin: 0; padding: 0; }
+  #controls {
+    position: absolute; top: 10px; right: 10px;
+    z-index: 1000; 
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 10px 14px;
+    border-radius: 6px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    font-family: system-ui,sans-serif; font-size: 14px;
+    display: flex; flex-direction: column; gap: 8px;
+    min-width: 200px;
+  }
+  #controls input[type="text"] {
+    padding: 4px; border: none; border-radius: 4px;
+    font-size: 14px; width: 100%;
+  }
+  #controls button {
+    padding: 6px; border: none; border-radius: 4px;
+    cursor: pointer; font-size: 14px;
+  }
+  #controls label {
+    display: flex; align-items: center; gap: 6px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div id="controls">
+  <input type="text" id="ipInput" placeholder="Introduce IP (ej. 8.8.8.8)">
+  <button id="addIpBtn">Añadir</button>
+  <label><input type="checkbox" id="toggleMarkers" checked> Mostrar marcadores</label>
+  <label><input type="checkbox" id="toggleRadius" checked> Mostrar radio</label>
+  <label><input type="checkbox" id="toggleStyle"> Mapa satélite</label>
+  <button id="saveMapBtn">Guardar mapa</button>
+</div>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-image/0.4.0/leaflet-image.js"></script>
+<script>
+const map = L.map('map').setView([20, 0], 2);
+
+// Capas base
+const satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Tiles &copy; Esri &mdash; Fuente: Esri, Earthstar Geographics'
+});
+
+const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 19
+});
+
+// Por defecto arrancamos en mapa oscuro
+darkLayer.addTo(map);
+
+let allMarkers = [];
+let allCircles = [];
+
+// Buscar IP y añadir marcador + radio
+document.getElementById("addIpBtn").addEventListener("click", () => {
+  const ip = document.getElementById("ipInput").value.trim();
+  if (!ip) return;
+
+  document.getElementById("addIpBtn").textContent = "Procesando...";
+  fetch(`http://ip-api.com/json/${ip}?fields=status,message,query,city,regionName,country,lat,lon,isp`)
+    .then(r => r.json())
+    .then(data => {
+      if (data.status !== "success") {
+        alert(`Error: ${data.message || "IP no encontrada"}`);
+        return;
+      }
+      const coords = [data.lat, data.lon];
+      const popup = `${data.city || "Desconocida"}${data.regionName ? ", "+data.regionName : ""}${data.country ? ", "+data.country : ""}<br>
+                     IP: ${data.query}<br>ISP: ${data.isp}<br>(${data.lat.toFixed(5)}, ${data.lon.toFixed(5)})`;
+
+      const marker = L.marker(coords).bindPopup(popup);
+      marker.addTo(map);
+      allMarkers.push(marker);
+
+      const circle = L.circle(coords, {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.2,
+        radius: 5000
+      });
+      circle.addTo(map);
+      allCircles.push(circle);
+
+      map.setView(coords, 8);
+      applyVisibility();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Error de conexión");
+    })
+    .finally(() => {
+      document.getElementById("addIpBtn").textContent = "Añadir";
+    });
+});
+
+function applyVisibility() {
+  const markersVisible = document.getElementById("toggleMarkers").checked;
+  const radiusVisible = document.getElementById("toggleRadius").checked;
+
+  allMarkers.forEach(m => markersVisible ? m.addTo(map) : map.removeLayer(m));
+  allCircles.forEach(c => radiusVisible ? c.addTo(map) : map.removeLayer(c));
+}
+
+document.getElementById("toggleMarkers").addEventListener("change", applyVisibility);
+document.getElementById("toggleRadius").addEventListener("change", applyVisibility);
+
+// Cambiar estilo del mapa
+document.getElementById("toggleStyle").addEventListener("change", function() {
+  if (this.checked) {
+    map.removeLayer(darkLayer);
+    satLayer.addTo(map);
+  } else {
+    map.removeLayer(satLayer);
+    darkLayer.addTo(map);
+  }
+});
+
+// Guardar imagen del mapa
+document.getElementById("saveMapBtn").addEventListener("click", () => {
+  leafletImage(map, function(err, canvas) {
+    if (err) {
+      console.error(err);
+      alert("Error al generar la imagen");
+      return;
+    }
+    const link = document.createElement("a");
+    link.download = "mapa.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+});
+</script>
+</body>
+</html>
+

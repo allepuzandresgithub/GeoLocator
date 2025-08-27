@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Mapa Interactivo</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<style>
+  body { margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #1e1e1e; color: white; }
+  #map { height: 100vh; width: 100%; }
+  .info-panel {
+    position: absolute;
+    top: 20px; left: 20px;
+    background: rgba(0,0,0,0.7);
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .info-panel button {
+    margin-top: 5px;
+    width: 100%;
+    padding: 5px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  .info-panel button:hover { background: #45a049; }
+</style>
+</head>
+<body>
+
+<div id="map"></div>
+<div class="info-panel">
+  <div><strong>Ciudad:</strong> Zarautz</div>
+  <div><strong>Región:</strong> Gipuzkoa</div>
+  <div><strong>País:</strong> España</div>
+  <div><strong>IP:</strong> 123.45.67.89</div>
+  <div><strong>ISP:</strong> Proveedor de Internet Ejemplo</div>
+  <button onclick="guardarMapa()">Guardar mapa</button>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  const lat = parseFloat("43.2841");
+  const lon = parseFloat("-2.1699");
+
+  const map = L.map('map').setView([lat, lon], 13);
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19
+  }).addTo(map);
+
+  // Marcador arrastrable
+  const marker = L.marker([lat, lon], { draggable: true }).addTo(map);
+
+  // Círculo de 500 metros
+  const circle = L.circle([lat, lon], { radius: 500, color: 'red', fillOpacity: 0.3 }).addTo(map);
+
+  marker.on('dragend', function (e) {
+    const pos = marker.getLatLng();
+    circle.setLatLng(pos);
+    console.log(`Nuevo marcador en: ${pos.lat}, ${pos.lng}`);
+  });
+
+  function guardarMapa() {
+    alert("Aquí iría la lógica para guardar el mapa o su imagen");
+  }
+</script>
+
+</body>
+</html>
+
