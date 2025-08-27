@@ -15,13 +15,25 @@ Este proyecto es una aplicación web que utiliza **Leaflet** para mostrar ubicac
 Sigue estos pasos para poner en marcha el proyecto en tu entorno local:
 
 1. **Instala Rust**  
-   Si aún no lo tienes, instala Rust y Cargo desde [https://rustup.rs/](https://rustup.rs/).
+   Si aún no lo tienes, instala Rust y Cargo desde [https://rustup.rs/].
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   
+2. **Añade rust al PATH recargando la configuración del shell**  
+   ```bash
+   source $HOME/.cargo/env
 
-2. **Clona este repositorio**  
+3. **Clona este repositorio**  
    ```bash
    git clone https://github.com/allepuzandresgithub/GeoLocator
    cd GeoLocator
-   cargo build       # compila en modo debug
-   cargo build --release   # compila optimizado para producción
-   cargo run         # compila (si es necesario) y ejecuta en modo debug
-   cargo run --release   # compila optimizado y ejecuta
+
+4. **Intala las dependencias**
+   ```bash
+   sudo apt update
+   sudo apt install build-essential curl
+
+5. **Compila y ejecuta el programa**
+   ```bash
+   cargo build       
+   cargo run         
